@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" fx:id="containerPane" prefHeight="389.0" prefWidth="600.0" style="-fx-background-color: #2E315B;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.qdeck.FXMLController">
+   <children>
+      <StackPane fx:id="cardsStackPane" layoutX="-4.0" prefHeight="389.0" prefWidth="615.0" AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane fx:id="loginNode" onKeyPressed="#loignNodeKeyPressed" prefHeight="788.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <Button fx:id="loginBtn" layoutX="254.0" layoutY="275.0" mnemonicParsing="false" onAction="#loginButtonPressed" prefHeight="27.0" prefWidth="76.0" text="Login" />
+                  <PasswordField fx:id="passwordTextField" layoutX="218.0" layoutY="195.0" promptText="Password" />
+                  <TextField fx:id="staffNoTextField" layoutX="218.0" layoutY="160.0" promptText="Staff Number" />
+                  <ComboBox fx:id="loginCombo" layoutX="217.0" layoutY="227.0" onMouseClicked="#loginComboMouseClicked" prefWidth="150.0" promptText="Select Service" />
+                  <Label layoutX="249.0" layoutY="121.0" text="Staff Login" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="loginActionLabel" alignment="CENTER" layoutX="174.0" layoutY="252.0" prefHeight="20.0" prefWidth="236.0" textAlignment="CENTER" textFill="#ae2b2b">
+                     <font>
+                        <Font size="13.0" />
+                     </font></Label>
+                  <ImageView fitHeight="88.0" fitWidth="137.0" layoutX="235.0" layoutY="33.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/logo-white-small.PNG" />
+                     </image>
+                  </ImageView>
+                  <Label layoutX="349.0" layoutY="368.0" text="Copyright © 2020 all rights reserved Queue Deck LLC" textFill="WHITE">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="newCustomerNode" prefHeight="788.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <ImageView fitHeight="360.0" fitWidth="600.0" layoutY="29.0" pickOnBounds="true">
+                     <effect>
+                        <GaussianBlur radius="4.0" />
+                     </effect>
+                  </ImageView>
+                  <Button layoutX="68.0" layoutY="239.0" mnemonicParsing="false" onAction="#newCusNoShowButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="No Show" />
+                  <Button layoutX="473.0" layoutY="239.0" mnemonicParsing="false" onAction="#newCusDoneButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Done" />
+                  <Button layoutX="292.0" layoutY="239.0" mnemonicParsing="false" onAction="#newCusTransferButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Transfer" />
+                  <ToggleButton fx:id="newCusLockBtn" layoutX="473.0" layoutY="315.0" mnemonicParsing="false" onAction="#newCusLockButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Lock" />
+                  <Button layoutX="180.0" layoutY="239.0" mnemonicParsing="false" onAction="#newCusNextButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Next" />
+                  <Button layoutX="292.0" layoutY="304.0" mnemonicParsing="false" onAction="#newCusCallTransferedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Trans" />
+                  <Button layoutX="68.0" layoutY="304.0" mnemonicParsing="false" onAction="#newCusCallMissedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Missed" />
+                  <Button layoutX="180.0" layoutY="304.0" mnemonicParsing="false" onAction="#newCusCallAgainActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Again" />
+                  <CheckBox fx:id="newCusAutoTransferCB" layoutX="448.0" layoutY="289.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="130.0" selected="true" text="Auto Call Transfered" textAlignment="CENTER" textFill="WHITE" />
+                  <ImageView fitHeight="160.0" fitWidth="200.0" layoutX="390.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/currentservingticket.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" layoutX="140.0" layoutY="29.0" prefHeight="17.0" prefWidth="227.0" text="New Customer" textFill="WHITE">
+                     <font>
+                        <Font size="21.0" />
+                     </font></Label>
+                  <ListView fx:id="newCusAllListView" blendMode="SCREEN" layoutX="146.0" layoutY="102.0" prefHeight="95.0" prefWidth="165.0" />
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-exchange-802.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="newCustomerTranferNoLabel" alignment="CENTER" layoutX="336.0" layoutY="160.0" prefHeight="40.0" prefWidth="41.0" text="0" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" layoutX="79.0" layoutY="71.0" prefHeight="17.0" prefWidth="51.0" text="Missed" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="217.0" layoutY="71.0" prefHeight="17.0" prefWidth="26.0" text="All" textAlignment="CENTER" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="324.0" layoutY="71.0" text="Transfered" textAlignment="CENTER" textFill="WHITE" />
+                  <Label fx:id="newCusCurrentlyServingLabel" alignment="CENTER" layoutX="398.0" layoutY="66.0" prefHeight="130.0" prefWidth="180.0" textAlignment="CENTER" textFill="#14145e">
+                     <font>
+                        <Font size="80.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="34.0" fitWidth="38.0" layoutX="15.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-queue-32.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="newCusNoInline" alignment="CENTER" layoutX="50.0" layoutY="40.0" prefHeight="25.0" prefWidth="38.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="newCusMissedNoLabel" alignment="CENTER" layoutX="88.0" layoutY="160.0" prefHeight="30.0" prefWidth="34.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="95.0" fitWidth="51.0" layoutX="80.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/170-512.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="otherNode" prefHeight="788.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <ImageView fitHeight="360.0" fitWidth="600.0" layoutY="29.0" pickOnBounds="true">
+                     <effect>
+                        <GaussianBlur radius="4.0" />
+                     </effect>
+                  </ImageView>
+                  <Button layoutX="68.0" layoutY="239.0" mnemonicParsing="false" onAction="#otherNoShowButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="No Show" />
+                  <Button layoutX="473.0" layoutY="239.0" mnemonicParsing="false" onAction="#otherDoneButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Done" />
+                  <Button layoutX="292.0" layoutY="239.0" mnemonicParsing="false" onAction="#otherTransferButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Transfer" />
+                  <ToggleButton fx:id="otherLockBtn" layoutX="473.0" layoutY="315.0" mnemonicParsing="false" onAction="#otherLockButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Lock" />
+                  <Button layoutX="180.0" layoutY="239.0" mnemonicParsing="false" onAction="#otherNextButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Next" />
+                  <Button layoutX="292.0" layoutY="304.0" mnemonicParsing="false" onAction="#otherCallTransferedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Trans" />
+                  <Button layoutX="68.0" layoutY="304.0" mnemonicParsing="false" onAction="#otherCallMissedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Missed" />
+                  <Button layoutX="180.0" layoutY="304.0" mnemonicParsing="false" onAction="#otherCallAgainActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Again" />
+                  <CheckBox fx:id="otherAutoTransferCB" layoutX="448.0" layoutY="290.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="130.0" selected="true" text="Auto Call Transfered" textAlignment="CENTER" textFill="WHITE" />
+                  <ImageView fitHeight="160.0" fitWidth="200.0" layoutX="390.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/currentservingticket.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" layoutX="174.0" layoutY="25.0" prefHeight="40.0" prefWidth="149.0" text="Others" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="25.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="otherAllListView" blendMode="SCREEN" layoutX="146.0" layoutY="102.0" prefHeight="95.0" prefWidth="165.0" />
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-exchange-802.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" layoutX="93.0" layoutY="65.0" text="Missed" textAlignment="CENTER" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="217.0" layoutY="65.0" text="All" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="310.0" layoutY="65.0" text="Transfered" textFill="WHITE" />
+                  <Label fx:id="otherTranferNoLabel" alignment="CENTER" layoutX="336.0" layoutY="160.0" prefHeight="32.0" prefWidth="38.0" text="0" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="otherCurrentlyServingLabel" alignment="CENTER" layoutX="400.0" layoutY="70.0" prefHeight="130.0" prefWidth="180.0" textAlignment="CENTER" textFill="#1b276f">
+                     <font>
+                        <Font size="80.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="34.0" fitWidth="38.0" layoutX="15.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-queue-32.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="otherNoInline" alignment="CENTER" layoutX="50.0" layoutY="40.0" prefHeight="25.0" prefWidth="38.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="otherMissedNoLabel" alignment="CENTER" layoutX="88.0" layoutY="160.0" prefHeight="30.0" prefWidth="38.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="80.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/170-512.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="currentCustomerNode" prefHeight="328.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <ImageView fitHeight="360.0" fitWidth="600.0" layoutY="29.0" pickOnBounds="true">
+                     <effect>
+                        <GaussianBlur radius="4.0" />
+                     </effect>
+                  </ImageView>
+                  <Button layoutX="68.0" layoutY="239.0" mnemonicParsing="false" onAction="#currentCusNoShowButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="No Show" />
+                  <Button layoutX="473.0" layoutY="239.0" mnemonicParsing="false" onAction="#currentCusDoneButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Done" />
+                  <Button layoutX="292.0" layoutY="239.0" mnemonicParsing="false" onAction="#currentCusTransferButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Transfer" />
+                  <ToggleButton fx:id="currentCusLockBtn" layoutX="473.0" layoutY="315.0" mnemonicParsing="false" onAction="#currentCusLockButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Lock" />
+                  <Button layoutX="180.0" layoutY="239.0" mnemonicParsing="false" onAction="#currentCusNextButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Next" />
+                  <Button layoutX="292.0" layoutY="304.0" mnemonicParsing="false" onAction="#currentCusCallTransferedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Trans" />
+                  <Button layoutX="68.0" layoutY="304.0" mnemonicParsing="false" onAction="#currentCusCallMissedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Missed" />
+                  <Button layoutX="180.0" layoutY="304.0" mnemonicParsing="false" onAction="#currentCusCallAgainActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Again" />
+                  <CheckBox fx:id="currentCusAutoTransferCB" alignment="CENTER" layoutX="448.0" layoutY="289.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="130.0" selected="true" text="Auto Call Transfered" textAlignment="CENTER" textFill="WHITE" />
+                  <ImageView fitHeight="160.0" fitWidth="200.0" layoutX="390.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/currentservingticket.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" layoutX="161.0" layoutY="29.0" prefHeight="32.0" prefWidth="200.0" text="Current Customer" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="22.0" />
+                     </font></Label>
+                  <Label fx:id="currentCusCurrentlyServingLabel" alignment="CENTER" layoutX="400.0" layoutY="70.0" prefHeight="130.0" prefWidth="180.0" textAlignment="CENTER" textFill="#211272">
+                     <font>
+                        <Font size="80.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="currentCusAllListView" blendMode="SCREEN" layoutX="146.0" layoutY="102.0" prefHeight="95.0" prefWidth="165.0" />
+                  <Label fx:id="currentCustomerTranferNoLabel" alignment="CENTER" layoutX="330.0" layoutY="160.0" prefHeight="32.0" prefWidth="40.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="21.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-exchange-802.png" />
+                     </image>
+                  </ImageView>
+                  <Label layoutX="322.0" layoutY="73.0" text="Transfered" textFill="WHITE" />
+                  <Label layoutX="220.0" layoutY="73.0" text="All" textFill="WHITE" />
+                  <Label layoutX="89.0" layoutY="73.0" text="Missed" textFill="WHITE" />
+                  <ImageView fitHeight="35.0" fitWidth="35.0" layoutX="15.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-queue-32.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="currentCusNoInline" alignment="CENTER" layoutX="50.0" layoutY="40.0" prefHeight="25.0" prefWidth="38.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="currentCusMissedNoLabel" alignment="CENTER" layoutX="88.0" layoutY="160.0" prefHeight="20.0" prefWidth="34.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="80.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/170-512.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="servicesNode" prefHeight="788.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <ImageView fitHeight="360.0" fitWidth="600.0" layoutY="29.0" pickOnBounds="true">
+                     <effect>
+                        <GaussianBlur radius="4.0" />
+                     </effect>
+                  </ImageView>
+                  <Button layoutX="68.0" layoutY="239.0" mnemonicParsing="false" onAction="#servicesNoShowButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="No Show" />
+                  <Button layoutX="473.0" layoutY="239.0" mnemonicParsing="false" onAction="#servicesDoneButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Done" />
+                  <Button layoutX="292.0" layoutY="239.0" mnemonicParsing="false" onAction="#servicesTransferButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Transfer" />
+                  <ToggleButton fx:id="servicesLockBtn" layoutX="473.0" layoutY="315.0" mnemonicParsing="false" onAction="#servicesLockButtonActionPerformed" prefHeight="40.0" prefWidth="80.0" text="Lock" />
+                  <Button layoutX="180.0" layoutY="239.0" mnemonicParsing="false" onAction="#servicesNextButtonActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Next" />
+                  <Button layoutX="292.0" layoutY="304.0" mnemonicParsing="false" onAction="#servicesCallTransferedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Trans" />
+                  <Button layoutX="68.0" layoutY="304.0" mnemonicParsing="false" onAction="#servicesCallMissedActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Missed" />
+                  <Button layoutX="180.0" layoutY="304.0" mnemonicParsing="false" onAction="#servicesCallAgainActionPerformed" prefHeight="50.0" prefWidth="100.0" text="Call Again" />
+                  <CheckBox fx:id="servicesAutoTransferCB" layoutX="448.0" layoutY="289.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="130.0" selected="true" text="Auto Call Transfered" textAlignment="CENTER" textFill="WHITE" />
+                  <ImageView fitHeight="160.0" fitWidth="200.0" layoutX="390.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/currentservingticket.png" />
+                     </image>
+                  </ImageView>
+                  <ListView fx:id="servicesAllListView" blendMode="SCREEN" layoutX="146.0" layoutY="102.0" prefHeight="95.0" prefWidth="165.0" />
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="330.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-exchange-802.png" />
+                     </image>
+                  </ImageView>
+                  <Label alignment="CENTER" layoutX="189.0" layoutY="28.0" prefHeight="17.0" prefWidth="99.0" text="Services" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="23.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="86.0" layoutY="64.0" text="Missed" textFill="WHITE" />
+                  <Label layoutX="216.0" layoutY="64.0" text="All" textFill="WHITE" />
+                  <Label fx:id="servicesTranferNoLabel" alignment="CENTER" layoutX="336.0" layoutY="160.0" prefHeight="34.0" prefWidth="38.0" text="0" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="327.0" layoutY="64.0" text="Transfered" textFill="WHITE" />
+                  <Label fx:id="servicesCurrentlyServingLabel" alignment="CENTER" layoutX="400.0" layoutY="70.0" prefHeight="130.0" prefWidth="180.0" textFill="#221d6f">
+                     <font>
+                        <Font size="80.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="34.0" fitWidth="38.0" layoutX="15.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/icons8-queue-32.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="servicesNoInline" alignment="CENTER" layoutX="50.0" layoutY="40.0" prefHeight="25.0" prefWidth="38.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="servicesMissedNoLabel" alignment="CENTER" layoutX="88.0" layoutY="160.0" prefHeight="30.0" prefWidth="34.0" text="0" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="80.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../iconsAndLogos/170-512.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="statsNode" prefHeight="395.0" prefWidth="600.0" style="-fx-background-color: #2E315B;">
+               <children>
+                  <Label alignment="CENTER" layoutX="406.0" layoutY="30.0" prefHeight="9.0" prefWidth="180.0" text="Statistics" textAlignment="CENTER" textFill="WHITE">
+                     <font>
+                        <Font size="19.0" />
+                     </font>
+                  </Label>
+                  <Button layoutX="10.0" layoutY="28.0" mnemonicParsing="false" onAction="#statsBackButtonPressed" prefHeight="32.0" prefWidth="63.0" text="Back" />
+                  <Label alignment="CENTER" layoutX="10.0" layoutY="67.0" prefHeight="34.0" prefWidth="150.0" text="AVG Service Time" textAlignment="CENTER" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="138.0" layoutY="73.0" prefHeight="27.0" prefWidth="126.0" text="AVG Wait Time" textAlignment="CENTER" textFill="WHITE" />
+                  <Label fx:id="avgServiceTimeLabel" alignment="CENTER" layoutX="33.0" layoutY="101.0" prefHeight="21.0" prefWidth="105.0" text="0" textAlignment="CENTER" textFill="WHITE" />
+                  <Label fx:id="avgWaitTimeLabel" alignment="CENTER" layoutX="152.0" layoutY="101.0" prefHeight="21.0" prefWidth="99.0" text="0" textAlignment="CENTER" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="252.0" layoutY="74.0" prefHeight="25.0" prefWidth="126.0" text="Transactions" textAlignment="CENTER" textFill="WHITE" />
+                  <Label fx:id="peopleAttentedTO" alignment="CENTER" layoutX="289.0" layoutY="101.0" prefHeight="25.0" prefWidth="51.0" text="0" textAlignment="CENTER" textFill="WHITE" />
+                  <Label alignment="CENTER" layoutX="372.0" layoutY="76.0" prefHeight="21.0" prefWidth="99.0" text="Productivity" textAlignment="CENTER" textFill="WHITE" />
+                  <Label fx:id="productivityLabel" alignment="CENTER" layoutX="383.0" layoutY="101.0" prefHeight="27.0" prefWidth="76.0" text="0%" textAlignment="CENTER" textFill="WHITE" />
+                  <LineChart fx:id="lineChart" blendMode="SCREEN" layoutX="289.0" layoutY="153.0" legendVisible="false" prefHeight="221.0" prefWidth="294.0" verticalGridLinesVisible="false">
+                    <xAxis>
+                      <CategoryAxis side="BOTTOM" tickLabelFill="WHITE" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis side="LEFT" tickLabelFill="WHITE" />
+                    </yAxis>
+                  </LineChart>
+                  <PieChart fx:id="statsPieChart" labelLineLength="1.0" labelsVisible="false" layoutX="3.0" layoutY="140.0" prefHeight="246.0" prefWidth="304.0" />
+               </children>
+            </AnchorPane>
+         </children>
+      </StackPane>
+      <MenuBar fx:id="menuBar" blendMode="SCREEN" maxWidth="1.7976931348623157E308" prefHeight="0.0" prefWidth="615.0">
+         <menus>
+            <Menu mnemonicParsing="false" text="Options">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#changeCounterActionPerformed" text="Change Counter" />
+                  <MenuItem mnemonicParsing="false" onAction="#changePasswordActionPerformed" text="Change Password" />
+                  <MenuItem mnemonicParsing="false" onAction="#statsButtonPressed" text="Stats" />
+                  <MenuItem mnemonicParsing="false" onAction="#logoutMenuActionPerformed" text="Logout" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Change Service">
+               <items>
+                  <MenuItem fx:id="currentCusMenuItem" mnemonicParsing="false" onAction="#currentCusMenuClicked" text="Current Customer" />
+                  <MenuItem fx:id="newCusMenuItem" mnemonicParsing="false" onAction="#newCusMenuClicked" text="New Customer" />
+                  <MenuItem fx:id="servicesMenuItem" mnemonicParsing="false" onAction="#servicesMenuClicked" text="Services" />
+                  <MenuItem fx:id="otherMenuItem" mnemonicParsing="false" onAction="#otherMenuClicked" text="Other" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#checkForUpdatesPressed" text="Check For Updates" />
+                  <MenuItem mnemonicParsing="false" onAction="#aboutPressed" text="About" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
+      <Label fx:id="loggedInAsLabel" layoutX="14.0" layoutY="390.0" prefHeight="17.0" prefWidth="156.0" textFill="WHITE" />
+      <Label fx:id="counterLabel" layoutX="177.0" layoutY="390.0" prefHeight="17.0" prefWidth="149.0" textFill="WHITE" />
+   </children>
+</AnchorPane>
