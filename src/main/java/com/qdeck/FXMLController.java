@@ -212,7 +212,7 @@ public class FXMLController implements Initializable {
         try{
             Connection con=pool.getConnection();
             ArrayList<String> ql = new ArrayList<>();
-            PreparedStatement getqueue = con.prepareStatement("select service from services where service != '"+lcb+"' and locked = '0'");
+            PreparedStatement getqueue = con.prepareStatement("select service from services where service != '"+lcb+"'");
             ResultSet gq = getqueue.executeQuery();
             queueSelection.getItems().clear();
             while(gq.next()){
