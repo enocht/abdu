@@ -209,48 +209,81 @@ public class FXMLController implements Initializable {
         dialog.getDialogPane().setContent(grid);
 
         String lcb = loginCombo.getSelectionModel().getSelectedItem();
-        listservice(servicesSelction, queueSelection, lcb);  
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == done){ 
-                if(queueSelection.getSelectionModel().getSelectedItem().toString() == null) {
-                    createAlert(AlertType.ERROR, "Error", "Cannot Transfer Ticket", "Please select a queue and service to transfer to");
-                } else {
-                    try {
-                        Connection con=pool.getConnection();
-                        ArrayList<String> queue_list = new ArrayList<>();
-                        ArrayList<String> service_list = new ArrayList<>();
-                        PreparedStatement getqueue = con.prepareStatement("select service from services");
-                        PreparedStatement getservices = con.prepareStatement("select service from queue_services");
-                        ResultSet gq = getqueue.executeQuery();
-                        ResultSet gs = getservices.executeQuery();
-                        while(gq.next()){
-                            queue_list.add(gq.getString("service"));
+        try{
+            Connection con=pool.getConnection();
+            ArrayList<String> ql = new ArrayList<>();
+            PreparedStatement getqueue = con.prepareStatement("select service from services where service != '"+lcb+"' and locked = '0'");
+            ResultSet gq = getqueue.executeQuery();
+            queueSelection.getItems().clear();
+            while(gq.next()){
+                String temp = gq.getString("service");
+                queueSelection.getItems().addAll(temp);
+                ql.add(temp);
+            }
+            queueSelection.setPromptText("Select Queue");
+            servicesSelction.setPromptText("Select Service");
+            queueSelection.setOnAction((Event t) -> {
+                for (int i = 0; i < ql.size(); i++) {
+                    if(queueSelection.getSelectionModel().getSelectedItem().toString().equals(ql.get(i))){
+                        try {
+                            servicesSelction.getItems().clear();
+                            PreparedStatement getservices = con.prepareStatement("select service from queue_services where q_no = (select s_no from services where service = '"+ql.get(i)+"')");
+                            ResultSet gs = getservices.executeQuery();
+                            while(gs.next()){
+                                servicesSelction.getItems().addAll(gs.getString("service"));
+                            }
+                            servicesSelction.getSelectionModel().selectFirst();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        while(gs.next()){
-                            service_list.add(gs.getString("service"));
-                        }
-                        for (int i = 0; i < queue_list.size(); i++) {
-                            if(queueSelection.getSelectionModel().getSelectedItem().toString().equals(queue_list.get(i))){
-                                for (int j = 0; i<service_list.size(); j++){
-                                    if(servicesSelction.getSelectionModel().getSelectedItem().toString().equals(service_list.get(j))){
-                                        return new Pair<>(queue_list.get(i), service_list.get(j));
+                    }
+                }
+            });
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == done){ 
+                    if(queueSelection.getSelectionModel().getSelectedItem().toString() == null) {
+                        createAlert(AlertType.ERROR, "Error", "Cannot Transfer Ticket", "Please select a queue and service to transfer to");
+                    } else { 
+                        try {
+                            ArrayList<String> queue_list = new ArrayList<>();
+                            ArrayList<String> service_list = new ArrayList<>();
+                            PreparedStatement getqueue2 = con.prepareStatement("select service from services");
+                            PreparedStatement getservices = con.prepareStatement("select service from queue_services");
+                            ResultSet gq2 = getqueue2.executeQuery();
+                            ResultSet gs = getservices.executeQuery();
+                            while(gq2.next()){
+                                queue_list.add(gq2.getString("service"));
+                            }
+                            while(gs.next()){
+                                service_list.add(gs.getString("service"));
+                            }
+                            for (int i = 0; i < queue_list.size(); i++) {
+                                if(queueSelection.getSelectionModel().getSelectedItem().toString().equals(queue_list.get(i))){
+                                    for (int j = 0; i<service_list.size(); j++){
+                                        if(servicesSelction.getSelectionModel().getSelectedItem().toString().equals(service_list.get(j))){
+                                            return new Pair<>(queue_list.get(i), service_list.get(j));
+                                        }
                                     }
                                 }
                             }
+                            pool.releaseConnection(con);
+                        } catch (SQLException ex) {
+                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        pool.releaseConnection(con);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            }
-            return null;
-        });
+                return null;
+            });
+        } catch (SQLException ex) {
+            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         Optional<Pair<String, String>> result = dialog.showAndWait();
-        result.ifPresent(transfer -> {
-            System.out.println(transfer.getKey()+" - "+transfer.getValue());
-        });
+        if(result.orElse(null) == null){
+            return null;
+        }
+        else{
             return result;
+        }
     }
     void showMissedTickets(Label missedNoLabel, String tag){
     try{
@@ -407,7 +440,7 @@ public class FXMLController implements Initializable {
             String vtn = v.substring(1,v.indexOf(" "));
             String vticket = vtag+vtn;
             String time_done = "";
-            Connection connect=pool.getConnection();
+            Connection connect = pool.getConnection();
             PreparedStatement locstmt = connect.prepareStatement("select time_done from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"' limit 1");
             ResultSet rs = locstmt.executeQuery();
             while(rs.next()){
@@ -415,7 +448,7 @@ public class FXMLController implements Initializable {
             }
             if(time_done  == null){
                 Optional<Pair<String,String>> transferPair = transferChoiseDialogWithServices();
-                if(transferPair.get().getKey() !=null){
+                if(transferPair.get().getKey() != null){
                     switch (transferPair.get().getKey()) {
                         case "Current Customer":
                             transferTicket(vtag, vtn, currentCusTag,transferPair.get().getValue());
@@ -446,7 +479,7 @@ public class FXMLController implements Initializable {
         else{createAlert(AlertType.WARNING, "Empty Queue", "No ticket on queue", null);}
     }
     else{createAlert(AlertType.WARNING, "Error", "No ticket called", null);}
-    }catch(Exception ex){ex.printStackTrace();}
+    }catch(Exception ex){}
     }
     public void callTransferedActionToPerform(ListView allListView, Label currentlyServing, String tag){
     try{
@@ -820,41 +853,6 @@ public class FXMLController implements Initializable {
         pool.releaseConnection(con);
         }   
         catch(SQLException ex){ex.printStackTrace();}
-    }
-    public void listservice(ComboBox servicesSelction, ComboBox queueSelection, String lcb){
-        try{
-            Connection con=pool.getConnection();
-            ArrayList<String> queue_list = new ArrayList<>();
-            PreparedStatement getqueue = con.prepareStatement("select service from services where service != '"+lcb+"'");
-            ResultSet gq = getqueue.executeQuery();
-            queueSelection.getItems().clear();
-            while(gq.next()){
-                String temp = gq.getString("service");
-                queueSelection.getItems().addAll(temp);
-                queue_list.add(temp);
-            }
-            queueSelection.setPromptText("Select Queue");
-            servicesSelction.setPromptText("Select Service");
-            queueSelection.setOnAction((Event t) -> {
-                for (int i = 0; i < queue_list.size(); i++) {
-                    if(queueSelection.getSelectionModel().getSelectedItem().toString().equals(queue_list.get(i))){
-                        try {
-                            servicesSelction.getItems().clear();
-                            PreparedStatement getservices = con.prepareStatement("select service from queue_services where q_no = (select s_no from services where service = '"+queue_list.get(i)+"')");
-                            ResultSet gs = getservices.executeQuery();
-                            while(gs.next()){
-                                servicesSelction.getItems().addAll(gs.getString("service"));
-                            }
-                            servicesSelction.getSelectionModel().selectFirst();
-                        } catch (SQLException ex) {
-                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            });
-            pool.releaseConnection(con);
-        }
-        catch(SQLException e){e.printStackTrace();}
     }
     private static void showNode(StackPane sp, Node nodeToShow){
        sp.getChildren().clear();
