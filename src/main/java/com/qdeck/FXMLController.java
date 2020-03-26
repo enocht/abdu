@@ -334,7 +334,7 @@ public class FXMLController implements Initializable {
             PreparedStatement trans_tickets = con.prepareStatement("select tag, t_no from transfer where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to = '"+tag+"' limit 1");
             ResultSet rs = call_next_ticket.executeQuery();
             ResultSet rs2 = trans_tickets.executeQuery();
-            String localtime = String.valueOf(LocalTime.now()).substring(0, 8);
+            String localtime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
             if(!allListVIew.getItems().isEmpty()){
                 if(allListVIew.getItems().size()>2)
                     allListVIew.getItems().remove(0);
@@ -421,7 +421,7 @@ public class FXMLController implements Initializable {
             Statement stmt=connect.createStatement();
             String tr1 = vtag;
             String tr2 = vtn;
-            String tr3 = String.valueOf(LocalTime.now()).substring(0, 8);
+            String tr3 = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
             String cmd = "insert into transfer (tag,t_no, trans_to, time_trans, service) values('"+tr1+"','"+tr2+"', '"+tag+"','"+tr3+"','"+service+"')";
             stmt.executeUpdate(cmd);
             String updTransferred = "update tickets set time_done = '"+tr3+"', transferred = TRUE where tag = '"+tr1+"' and t_no = '"+tr2+"' ";
@@ -489,7 +489,7 @@ public class FXMLController implements Initializable {
         stmt2.executeUpdate("update transfer set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and trans_to = '"+tag+"' limit 1");   
         //call ticket
         PreparedStatement call_ticket = con.prepareStatement("select tag, t_no from transfer where time_called is null and trans_to = '"+tag+"' and locked is not null and staff_no = '"+staffNoTextField.getText()+"' limit 1");
-        String currentTime = String.valueOf(LocalTime.now()).substring(0, 8);
+        String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
         ResultSet rs = call_ticket.executeQuery();
         if(rs.next()){
             if(!allListView.getItems().isEmpty()){
@@ -686,7 +686,7 @@ public class FXMLController implements Initializable {
                 String vtn = v.substring(1,v.indexOf(" "));
                 String time_done = "";
                 String missing_client = "";
-                String currentTime = String.valueOf(LocalTime.now()).substring(0, 8);
+                String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
                 try{
                     Connection con = pool.getConnection();
                     PreparedStatement stmt = con.prepareStatement("select time_done, missing_client from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"'");
@@ -730,7 +730,7 @@ public class FXMLController implements Initializable {
             currentlyServingTicketNumber.setText(vtag+vtn);
             callTicketToDisplay(vtag+vtn);
             allListView.getItems().add(vtag + vtn + " - " + service);
-            String currentTime = String.valueOf(LocalTime.now()).substring(0, 8);
+            String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
             stmt.executeUpdate("update tickets set time_called = '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"'");
             PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and staff_no = '"+staffNoTextField.getText()+"'");
             ResultSet counter = count.executeQuery();
@@ -760,7 +760,7 @@ public class FXMLController implements Initializable {
             if(!allListView.getItems().isEmpty()){
                String v = allListView.getItems().get(allListView.getItems().size()-1).toString();
                if(v != null){
-                   String localtime = String.valueOf(LocalTime.now()).substring(0, 8);
+                   String localtime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
                    Connection connect=pool.getConnection();
                    String vtag = v.substring(0,1);
                    String vtn = v.substring(1,v.indexOf(" "));
@@ -783,7 +783,7 @@ public class FXMLController implements Initializable {
             if(!allListView.getItems().isEmpty()){
                String v = allListView.getItems().get(allListView.getItems().size()-1).toString();
                if(v != null){
-                   String localtime = String.valueOf(LocalTime.now()).substring(0, 8);
+                   String localtime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
                    Connection connect=pool.getConnection();
                    String vtag = v.substring(0,1);
                    String vtn = v.substring(1,v.indexOf(" "));
