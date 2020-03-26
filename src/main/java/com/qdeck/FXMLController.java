@@ -407,7 +407,7 @@ public class FXMLController implements Initializable {
                     callTicketToDisplay(tkt);                       
                     stmt.executeUpdate("update tickets set locked = null, staff_no = null where time_called is null and locked is not null and missing_client is null and staff_no = '"+staffNoTextField.getText()+"' and tag='"+tag+"' limit 1");                       
                 }
-                else{createAlert(AlertType.WARNING, "Empty Queue", "Check auto call transfer box to call transfered ticket", null);}
+                else{createAlert(AlertType.WARNING, "Empty Queue", "Check auto call transfer box to call transfered ticket automatically", null);}
             }
             else{createAlert(AlertType.WARNING, "Empty Queue", "Queue is empty", null);}
             pool.releaseConnection(con);
@@ -664,7 +664,7 @@ public class FXMLController implements Initializable {
                         }
                         else{
                             shake(staffNoTextField);shake(passwordTextField);shake(loginActionLabel);
-                            loginActionLabel.setText("Incorrect Staff No or Password");
+                            loginActionLabel.setText("Incorrect Staff No and/or Password");
                         }                             
                     }
                 }
@@ -1144,45 +1144,34 @@ public class FXMLController implements Initializable {
         dialog.setHeaderText("Change Counter");
         dialog.setContentText("Type new counter:");
         Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()){
-        try{
-            Connection con=pool.getConnection();
-            PreparedStatement c_counter = con.prepareStatement("select counter from staff where staff_no = '"+staffNoTextField.getText()+"'");
-            ResultSet cc = c_counter.executeQuery();
-            PreparedStatement chk_counter = con.prepareStatement("select counter from staff");
-            ResultSet chkc = chk_counter.executeQuery();
-            boolean counterInUse = false ;
-            while(chkc.next()){
-                String chkCounter = chkc.getString("counter");
-                if(result.get().equals(chkCounter)){
-                    createAlert(AlertType.WARNING,"Cannot Use Counter", "Counter in use by another staff", null);
-                     counterInUse = true;
-                }
-            }
-            if(chkc.isAfterLast() && counterInUse == false){
-                while(cc.next()){
-                String cntr = cc.getString("counter");
-            if(!result.get().equals("") || !result.get().equals(" ")){
-                if(!result.get().substring(result.get().length()-1).equals("\\")){
-                    if(!result.get().equals("\\") || result.get().length() >10){
-                            if(cntr != null){
-                                Statement stmt =con.createStatement();
-                                    stmt.executeUpdate("update staff set counter ='"+result.get()+"' where staff_no = '"+staffNoTextField.getText()+"'");
-                                    counterLabel.setText("serving counter: "+result.get());
-                                    flash(counterLabel);
-                                    createAlert(AlertType.INFORMATION, "Counter Changed", "Counter was successfully changed", null);
-                                    //actionLabel.setText("");
-                                    }
-                                    else{createAlert(AlertType.ERROR, "Error", "Counter number not typed", null);}
-                                    }
-                                }
-                            else{createAlert(AlertType.ERROR, "Error", "Characters not allowed", null);}
-                        }
-                        else{createAlert(AlertType.ERROR, "Error", "Cannot be empty", null);}
+        if(result.isPresent()){
+            try{
+                Connection con=pool.getConnection();
+                PreparedStatement chk_counter = con.prepareStatement("select counter from staff");
+                ResultSet chkc = chk_counter.executeQuery();
+                boolean counterInUse = false ;
+                while(chkc.next()){
+                    String chkCounter = chkc.getString("counter");
+                    if(result.get().equals(chkCounter)){
+                        createAlert(AlertType.WARNING,"Cannot Use Counter", "Counter in use by another staff", null);
+                         counterInUse = true;
                     }
-                   }
-            pool.releaseConnection(con);
                 }
+                if(chkc.isAfterLast() && counterInUse == false){
+                    try{
+                        if(Integer.valueOf(result.get()) > 0 && Integer.valueOf(result.get()) < 10){
+                            Statement stmt =con.createStatement();
+                            stmt.executeUpdate("update staff set counter ='"+result.get()+"' where staff_no = '"+staffNoTextField.getText()+"'");
+                            counterLabel.setText("serving counter: "+result.get());
+                            flash(counterLabel);
+                            createAlert(AlertType.INFORMATION, "Counter Changed", "Counter was successfully changed", null);
+                        }
+                        else{createAlert(AlertType.ERROR, "Error", "Input Error!", null);changeCounterActionPerformed();}
+                    }
+                    catch(NumberFormatException e){;createAlert(AlertType.ERROR, "Error", "Input Error!", null);changeCounterActionPerformed();}    
+                } 
+                pool.releaseConnection(con);
+            }
             catch(SQLException e){e.printStackTrace();}
         }
     //result.ifPresent(name -> System.out.println("Your name: " + name));
@@ -1257,11 +1246,11 @@ public class FXMLController implements Initializable {
                                 if(newPassword.getText().length()>4){
                                     return new Pair<>("Confirmed Password",confirmPassword.getText());
                                 }
-                                else{createAlert(AlertType.ERROR, "Error", "Password too short", null);}
+                                else{createAlert(AlertType.ERROR, "Error", "Password too short", null);changePasswordActionPerformed();}
                             }
-                            else{createAlert(AlertType.ERROR, "Error", "Password could not be changed", "New password and current password do not match");}
+                            else{createAlert(AlertType.ERROR, "Error", "Error changing password", "New passwords do not match");changePasswordActionPerformed();}
                         }
-                        else{createAlert(AlertType.ERROR, "Error", "Error changing password", "Current password not correct!");}
+                        else{createAlert(AlertType.ERROR, "Error", "Error changing password", "Current password not correct!");changePasswordActionPerformed();}
                     }
                 } catch (SQLException ex) {Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);}
             }
@@ -1270,7 +1259,7 @@ public class FXMLController implements Initializable {
         Optional<Pair<String, String>> result = dialog.showAndWait();
         result.ifPresent(passwordToChange -> {
             try {
-                Statement stmt =con.createStatement();
+                Statement stmt = con.createStatement();
                 stmt.executeUpdate("update staff set password = md5('"+passwordToChange.getValue()+"') where staff_no = '"+staffNoTextField.getText()+"'");
                 createAlert(AlertType.INFORMATION, "Success", "Password successfully changed", null);
             } catch (SQLException ex) {
