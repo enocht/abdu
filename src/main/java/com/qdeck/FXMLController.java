@@ -1153,8 +1153,9 @@ public class FXMLController implements Initializable {
                 while(chkc.next()){
                     String chkCounter = chkc.getString("counter");
                     if(result.get().equals(chkCounter)){
-                        createAlert(AlertType.WARNING,"Cannot Use Counter", "Counter in use by another staff", null);
-                         counterInUse = true;
+                        createAlert(AlertType.WARNING,"Error", "Counter in use", null);
+                        changeCounterActionPerformed();
+                        counterInUse = true;
                     }
                 }
                 if(chkc.isAfterLast() && counterInUse == false){
