@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -79,6 +80,7 @@ public class FXMLController implements Initializable {
     String staffNo = "";
     Object selection;
     String tkt;
+    String local_date = String.valueOf(LocalDate.now());
     private String staff_level;
     private String currentCusTag;
     private String newCusTag;
@@ -288,7 +290,7 @@ public class FXMLController implements Initializable {
     void showMissedTickets(Label missedNoLabel, String tag){
     try{
         Connection con = pool.getConnection();
-        PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and tag = '"+tag+"' and staff_no = '"+staffNoTextField.getText()+"'");
+        PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and tag = '"+tag+"' and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"'");
         ResultSet counter = count.executeQuery();
         while(counter.next()){
             String value = counter.getString("count(*)");
@@ -327,11 +329,11 @@ public class FXMLController implements Initializable {
             Connection con = pool.getConnection();
             Statement stmt = con.createStatement();
             //first lock the ticket
-            stmt.executeUpdate("update tickets set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and missing_client is null and tag='"+tag+"' limit 1");
-            stmt.executeUpdate("update transfer set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and trans_to='"+tag+"' limit 1");
+            stmt.executeUpdate("update tickets set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and missing_client is null and tag='"+tag+"' and t_date='"+local_date+"' limit 1");
+            stmt.executeUpdate("update transfer set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and trans_to='"+tag+"' and t_date='"+local_date+"' limit 1");
             //now get the ticket
-            PreparedStatement call_next_ticket = con.prepareStatement("select tag,t_no,service from tickets where time_called is null and locked is not null and missing_client is null and tag='"+tag+"' and staff_no = '"+staffNoTextField.getText()+"' limit 1");
-            PreparedStatement trans_tickets = con.prepareStatement("select tag, t_no from transfer where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to = '"+tag+"' limit 1");
+            PreparedStatement call_next_ticket = con.prepareStatement("select tag,t_no,service from tickets where time_called is null and locked is not null and missing_client is null and tag='"+tag+"' and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' limit 1");
+            PreparedStatement trans_tickets = con.prepareStatement("select tag, t_no from transfer where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to = '"+tag+"' and t_date='"+local_date+"' limit 1");
             ResultSet rs = call_next_ticket.executeQuery();
             ResultSet rs2 = trans_tickets.executeQuery();
             String localtime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
@@ -342,10 +344,10 @@ public class FXMLController implements Initializable {
                 String vtag = vtkt.substring(0, 1);
                 int vtn = Integer.valueOf(vtkt.substring(1,vtkt.indexOf(" ")));
                 if(vtag.equals(tag)){
-                    stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null");
+                    stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"'");
                 }
                 else{
-                    stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null");
+                    stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"'");
                 }
             }
             if(rs.next()){
@@ -354,28 +356,28 @@ public class FXMLController implements Initializable {
                         String vtag = rs2.getString("tag");
                         int vt_no = rs2.getInt("t_no");
                         tkt = vtag + vt_no;
-                        PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"'");
+                        PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"' and t_date='"+local_date+"'");
                         ResultSet gs = getService.executeQuery();
                         String service = "";
                         while(gs.next()){service = gs.getString("service");}
-                        stmt.executeUpdate("update transfer set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"' and time_called is null");
+                        stmt.executeUpdate("update transfer set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"' and time_called is null and t_date='"+local_date+"'");
                         allListVIew.getItems().add(new ticket(vt_no, vtag) + " - " + service);
                         currentlyServingLabel.setText(tkt);
                         flash(currentlyServingLabel);
                         callTicketToDisplay(tkt);           
-                        stmt.executeUpdate("update tickets set locked = null, staff_no = null where time_called is null and locked is not null and missing_client is null and staff_no = '"+staffNoTextField.getText()+"' and tag='"+tag+"' limit 1");                       
+                        stmt.executeUpdate("update tickets set locked = null, staff_no = null where time_called is null and locked is not null and missing_client is null and staff_no = '"+staffNoTextField.getText()+"' and tag='"+tag+"' and t_date='"+local_date+"' limit 1");                       
                     }
                     else{
                         String ntag = rs.getString("tag");
                         int ntn = rs.getInt("t_no");
                         String service = rs.getString("service");
                         String ntkt = ntag+ntn;
-                        stmt.executeUpdate("update tickets set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where t_no = '"+ntn+"' and tag = '"+ntag+"' and time_called is null");
+                        stmt.executeUpdate("update tickets set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where t_no = '"+ntn+"' and tag = '"+ntag+"' and time_called is null and t_date='"+local_date+"'");
                         allListVIew.getItems().add(new ticket(ntn, ntag) + " - " + service);
                         currentlyServingLabel.setText(ntkt);
                         flash(currentlyServingLabel);
                         callTicketToDisplay(ntkt);
-                        stmt.executeUpdate("update transfer set locked = null, staff_no = null where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to='"+tag+"' limit 1");
+                        stmt.executeUpdate("update transfer set locked = null, staff_no = null where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to='"+tag+"' and t_date='"+local_date+"' limit 1");
                     }
                 }
                 else if(!autoTransferCB.isSelected()){
@@ -383,12 +385,12 @@ public class FXMLController implements Initializable {
                     int ntn = rs.getInt("t_no");
                     String service = rs.getString("service");
                     String ntkt = ntag+ntn;
-                    stmt.executeUpdate("update tickets set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where t_no = '"+ntn+"' and tag = '"+ntag+"' and time_called is null");
+                    stmt.executeUpdate("update tickets set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where t_no = '"+ntn+"' and tag = '"+ntag+"' and time_called is null and t_date='"+local_date+"'");
                     allListVIew.getItems().add(new ticket(ntn, ntag)  + " - " + service);
                     currentlyServingLabel.setText(ntkt);
                     flash(currentlyServingLabel);
                     callTicketToDisplay(ntkt);
-                    stmt.executeUpdate("update transfer set locked = null, staff_no = null where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to='"+tag+"' limit 1");
+                    stmt.executeUpdate("update transfer set locked = null, staff_no = null where time_called is null and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and trans_to='"+tag+"' and t_date='"+local_date+"' limit 1");
                 }
             }
             else if (rs2.next()){
@@ -396,16 +398,16 @@ public class FXMLController implements Initializable {
                     String vtag = rs2.getString("tag");
                     int vt_no = rs2.getInt("t_no");
                     tkt = vtag + vt_no;
-                    PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"'");
+                    PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"'and t_date='"+local_date+"'");
                     ResultSet gs = getService.executeQuery();
                     String service = "";
                     while(gs.next()){service = gs.getString("service");}
-                    stmt.executeUpdate("update transfer set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"' and time_called is null");
+                    stmt.executeUpdate("update transfer set time_called = '"+localtime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"' and time_called is null and t_date='"+local_date+"'");
                     allListVIew.getItems().add(new ticket(vt_no, vtag)  + " - " + service);
                     currentlyServingLabel.setText(tkt);
                     flash(currentlyServingLabel);
                     callTicketToDisplay(tkt);                       
-                    stmt.executeUpdate("update tickets set locked = null, staff_no = null where time_called is null and locked is not null and missing_client is null and staff_no = '"+staffNoTextField.getText()+"' and tag='"+tag+"' limit 1");                       
+                    stmt.executeUpdate("update tickets set locked = null, staff_no = null where time_called is null and locked is not null and missing_client is null and staff_no = '"+staffNoTextField.getText()+"' and tag='"+tag+"' and t_date='"+local_date+"' limit 1");                       
                 }
                 else{createAlert(AlertType.WARNING, "Empty Queue", "Check auto call transfer box to call transfered ticket automatically", null);}
             }
@@ -422,9 +424,9 @@ public class FXMLController implements Initializable {
             String tr1 = vtag;
             String tr2 = vtn;
             String tr3 = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
-            String cmd = "insert into transfer (tag,t_no, trans_to, time_trans, service) values('"+tr1+"','"+tr2+"', '"+tag+"','"+tr3+"','"+service+"')";
+            String cmd = "insert into transfer (tag,t_no, trans_to, time_trans, service, t_date) values('"+tr1+"','"+tr2+"', '"+tag+"','"+tr3+"','"+service+"', '"+local_date+"')";
             stmt.executeUpdate(cmd);
-            String updTransferred = "update tickets set time_done = '"+tr3+"', transferred = TRUE where tag = '"+tr1+"' and t_no = '"+tr2+"' ";
+            String updTransferred = "update tickets set time_done = '"+tr3+"', transferred = TRUE where tag = '"+tr1+"' and t_no = '"+tr2+"' and t_date='"+local_date+"' ";
             stmt.executeUpdate(updTransferred);
             System.out.println("Transfer Table Updated");
             pool.releaseConnection(connect);
@@ -441,7 +443,7 @@ public class FXMLController implements Initializable {
             String vticket = vtag+vtn;
             String time_done = "";
             Connection connect = pool.getConnection();
-            PreparedStatement locstmt = connect.prepareStatement("select time_done from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"' limit 1");
+            PreparedStatement locstmt = connect.prepareStatement("select time_done from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"' and t_date='"+local_date+"' limit 1");
             ResultSet rs = locstmt.executeQuery();
             while(rs.next()){
                 time_done = rs.getString("time_done");
@@ -486,9 +488,9 @@ public class FXMLController implements Initializable {
         Connection con=pool.getConnection();
         Statement stmt2 =con.createStatement();
         //first lock the ticket
-        stmt2.executeUpdate("update transfer set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and trans_to = '"+tag+"' limit 1");   
+        stmt2.executeUpdate("update transfer set locked = true, staff_no = '"+staffNoTextField.getText()+"' where time_called is null and locked is null and trans_to = '"+tag+"' and t_date='"+local_date+"' limit 1");   
         //call ticket
-        PreparedStatement call_ticket = con.prepareStatement("select tag, t_no from transfer where time_called is null and trans_to = '"+tag+"' and locked is not null and staff_no = '"+staffNoTextField.getText()+"' limit 1");
+        PreparedStatement call_ticket = con.prepareStatement("select tag, t_no from transfer where time_called is null and trans_to = '"+tag+"' and locked is not null and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' limit 1");
         String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
         ResultSet rs = call_ticket.executeQuery();
         if(rs.next()){
@@ -498,16 +500,16 @@ public class FXMLController implements Initializable {
                 String v = allListView.getItems().get(allListView.getItems().size()-1).toString();
                 String vtag = v.substring(0,1);
                 String vtn = v.substring(1, v.indexOf(" "));
-                PreparedStatement transferred = con.prepareStatement("select transferred from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"'");
+                PreparedStatement transferred = con.prepareStatement("select transferred from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"' and t_date='"+local_date+"' ");
                 ResultSet rs2 = transferred.executeQuery();
                 if(rs2.next()){
                     String transfer = rs2.getString("transferred");
                     if(transfer!= null){
-                        String updTimeDone = "update transfer set time_done= '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and staff_no = '"+staffNoTextField.getText()+"'";
+                        String updTimeDone = "update transfer set time_done= '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' ";
                         stmt2.executeUpdate(updTimeDone);
                     }
                     else{
-                        String updTimeDone = "update tickets set time_done= '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and staff_no = '"+staffNoTextField.getText()+"'";
+                        String updTimeDone = "update tickets set time_done= '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' ";
                         stmt2.executeUpdate(updTimeDone);
                     }
                 }
@@ -515,12 +517,12 @@ public class FXMLController implements Initializable {
             String vtag = rs.getString("tag");
             int vt_no = rs.getInt("t_no");
             String trnstkt = vtag + vt_no;
-            PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"'");
+            PreparedStatement getService = con.prepareStatement("select service from transfer where tag = '"+vtag+"' and t_no = '"+vt_no+"' and t_date='"+local_date+"' ");
             ResultSet gs = getService.executeQuery();
             String service = "";
             while(gs.next()){
             service = gs.getString("service");}
-            stmt2.executeUpdate("update transfer set time_called = '"+currentTime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"'");
+            stmt2.executeUpdate("update transfer set time_called = '"+currentTime+"', staff_no = '"+staffNoTextField.getText()+"' where tag = '"+vtag+"' and t_no = '"+vt_no+"' and t_date='"+local_date+"'");
             currentlyServing.setText(trnstkt);
             callTicketToDisplay(trnstkt);
             allListView.getItems().add(new ticket(vt_no, vtag) + " - " + service);
@@ -536,7 +538,7 @@ public class FXMLController implements Initializable {
         if(!allListView.getItems().isEmpty()){
             String gettkt = allListView.getItems().get(allListView.getItems().size()-1).toString();
             String tkt = gettkt.substring(0, gettkt.indexOf(" "));
-            PreparedStatement call_ticket = con.prepareStatement("select time_done from tickets where tag = '"+gettkt.substring(0, 1)+"' and t_no = '"+gettkt.substring(1,gettkt.indexOf(" "))+"' limit 1");
+            PreparedStatement call_ticket = con.prepareStatement("select time_done from tickets where tag = '"+gettkt.substring(0, 1)+"' and t_no = '"+gettkt.substring(1,gettkt.indexOf(" "))+"' and t_date='"+local_date+"' limit 1");
             ResultSet rs = call_ticket.executeQuery();
             while(rs.next()){
                 String t_done = rs.getString("time_done");
@@ -689,16 +691,16 @@ public class FXMLController implements Initializable {
                 String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
                 try{
                     Connection con = pool.getConnection();
-                    PreparedStatement stmt = con.prepareStatement("select time_done, missing_client from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"'");
+                    PreparedStatement stmt = con.prepareStatement("select time_done, missing_client from tickets where tag = '"+vtag+"' and t_no = '"+vtn+"' and t_date='"+local_date+"'");
                     ResultSet rs = stmt.executeQuery();
                     Statement stmt2 =con.createStatement();
                     if(rs.next()){
                         time_done = rs.getString("time_done");
                         missing_client = rs.getString("missing_client");
                         if(time_done  == null && missing_client == null){
-                            stmt2.executeUpdate("update tickets set missing_client = '"+currentTime+"', time_called = Null where tag = '"+vtag+"' and t_no = '"+vtn+"' ");
+                            stmt2.executeUpdate("update tickets set missing_client = '"+currentTime+"', time_called = Null where tag = '"+vtag+"' and t_no = '"+vtn+"' and t_date='"+local_date+"' ");
                             allListView.getItems().remove(allListView.getItems().size()-1);
-                            PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and tag = '"+tag+"' and staff_no = '"+staffNoTextField.getText()+"'");
+                            PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and tag = '"+tag+"' and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"'");
                             ResultSet counter = count.executeQuery();
                             while(counter.next()){
                                 String value = counter.getString("count(*)");
@@ -718,7 +720,7 @@ public class FXMLController implements Initializable {
     public void callMissedActionToPerform(ListView allListView, Label currentlyServingTicketNumber,Label missedNoLabel){
     try{
         Connection con = pool.getConnection();
-        PreparedStatement call_client = con.prepareStatement("select tag, t_no, service from tickets where missing_client is not null and time_called is null and staff_no = '"+staffNoTextField.getText()+"' limit 1");
+        PreparedStatement call_client = con.prepareStatement("select tag, t_no, service from tickets where missing_client is not null and time_called is null and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' limit 1");
         ResultSet cc = call_client.executeQuery();
         if(cc.next()){
             if(allListView.getItems().size()>2)
@@ -731,8 +733,8 @@ public class FXMLController implements Initializable {
             callTicketToDisplay(vtag+vtn);
             allListView.getItems().add(vtag + vtn + " - " + service);
             String currentTime = String.valueOf(LocalTime.now().minusHours(1)).substring(0, 8);
-            stmt.executeUpdate("update tickets set time_called = '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"'");
-            PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and staff_no = '"+staffNoTextField.getText()+"'");
+            stmt.executeUpdate("update tickets set time_called = '"+currentTime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and t_date='"+local_date+"'");
+            PreparedStatement count = con.prepareStatement("select count(*) from tickets where missing_client is not null and time_called is null and staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' ");
             ResultSet counter = count.executeQuery();
             while(counter.next()){
                 String value = counter.getString("count(*)");
@@ -743,10 +745,10 @@ public class FXMLController implements Initializable {
                 String vtag2 = v.substring(0,1);
                 String vtn2 = v.substring(1,v.indexOf(" "));
                 if(vtag2.equals(vtag)){
-                    stmt.executeUpdate("update tickets set time_done= '"+currentTime+"' where tag = '"+vtag2+"' and t_no = '"+vtn2+"' and staff_no = '"+staffNoTextField.getText()+"' and time_done is null");
+                    stmt.executeUpdate("update tickets set time_done= '"+currentTime+"' where tag = '"+vtag2+"' and t_no = '"+vtn2+"' and staff_no = '"+staffNoTextField.getText()+"' and time_done is null and t_date='"+local_date+"'");
                 }
                 else{
-                    stmt.executeUpdate("update transfer set time_done= '"+currentTime+"' where tag = '"+vtag2+"' and t_no = '"+vtn2+"' and staff_no = '"+staffNoTextField.getText()+"' and time_done is null");
+                    stmt.executeUpdate("update transfer set time_done= '"+currentTime+"' where tag = '"+vtag2+"' and t_no = '"+vtn2+"' and staff_no = '"+staffNoTextField.getText()+"' and time_done is null and t_date='"+local_date+"'");
                 }
             }
         }
@@ -766,10 +768,10 @@ public class FXMLController implements Initializable {
                    String vtn = v.substring(1,v.indexOf(" "));
                    Statement stmt = connect.createStatement();
                    if(vtag.equals(tag)){
-                           stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null ");
+                           stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"' ");
                    }
                    else{
-                           stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null ");
+                           stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"' ");
                    }   
                    pool.releaseConnection(connect);
                }
@@ -789,11 +791,10 @@ public class FXMLController implements Initializable {
                    String vtn = v.substring(1,v.indexOf(" "));
                    Statement stmt = connect.createStatement();
                    if(vtag.equals(tag)){
-                       stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null");
+                       stmt.executeUpdate("update tickets set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"'");
                    }
                    else{
-                       System.out.println("It fucking did");
-                       stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null");
+                       stmt.executeUpdate("update transfer set time_done = '"+localtime+"' where tag = '"+vtag+"' and t_no = '"+vtn+"' and time_done is null and t_date='"+local_date+"'");
                    }   
                    pool.releaseConnection(connect);
                }
@@ -1289,7 +1290,7 @@ public class FXMLController implements Initializable {
             int ia =0;
             while(start<=timeNow){
                 String hour = String.valueOf(start);
-                PreparedStatement timecount = con.prepareStatement("select (CASE WHEN time_done LIKE '"+hour+":%' THEN '"+hour+"' END) as hour, count(*) as num_of_tickets from tickets where staff_no = '"+staffNoTextField.getText()+"' group by (CASE WHEN time_done LIKE '"+hour+":%' THEN '"+hour+"' END)");
+                PreparedStatement timecount = con.prepareStatement("select (CASE WHEN time_done LIKE '"+hour+":%' THEN '"+hour+"' END) as hour, count(*) as num_of_tickets from tickets where staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' group by (CASE WHEN time_done LIKE '"+hour+":%' THEN '"+hour+"' END)");
                 ResultSet rsCount = timecount.executeQuery();
                 while(rsCount.next()){
                     String time_done = rsCount.getString("hour");
@@ -1303,7 +1304,7 @@ public class FXMLController implements Initializable {
             if(plotLine == false){
                 lineChart.getData().add(dataSeries1);
             }
-            PreparedStatement service_count = con.prepareStatement("select tag, count(tag) as amount from tickets where staff_no = '"+staffNoTextField.getText()+"' group by tag;");
+            PreparedStatement service_count = con.prepareStatement("select tag, count(tag) as amount from tickets where staff_no = '"+staffNoTextField.getText()+"' and t_date='"+local_date+"' group by tag;");
             ResultSet rsSCount = service_count.executeQuery();
             
             if(plotPie == true){
@@ -1343,11 +1344,11 @@ public class FXMLController implements Initializable {
             
                 //average wait time and average service time
                 // tickets table
-                PreparedStatement test = con.prepareStatement("select time_created, time_called from tickets where staff_no = '"+staffNoTextField.getText()+"' and time_called is not null");
-                PreparedStatement test2 = con.prepareStatement("select time_called, time_done from tickets where staff_no = '"+staffNoTextField.getText()+"' and time_done is not null ");                
+                PreparedStatement test = con.prepareStatement("select time_created, time_called from tickets where staff_no = '"+staffNoTextField.getText()+"' and time_called is not null and t_date='"+local_date+"'");
+                PreparedStatement test2 = con.prepareStatement("select time_called, time_done from tickets where staff_no = '"+staffNoTextField.getText()+"' and time_done is not null and t_date='"+local_date+"'");                
                 // transfer table
-                PreparedStatement trans_table = con.prepareStatement("select time_trans, time_called from transfer where staff_no = '"+staffNoTextField.getText()+"' and time_called is not null");
-                PreparedStatement trans_table2 = con.prepareStatement("select time_called, time_done from transfer where staff_no = '"+staffNoTextField.getText()+"' and time_done is not null ");
+                PreparedStatement trans_table = con.prepareStatement("select time_trans, time_called from transfer where staff_no = '"+staffNoTextField.getText()+"' and time_called is not null and t_date='"+local_date+"'");
+                PreparedStatement trans_table2 = con.prepareStatement("select time_called, time_done from transfer where staff_no = '"+staffNoTextField.getText()+"' and time_done is not null and t_date='"+local_date+"' ");
                 
                 ResultSet rs = test.executeQuery();
                 ResultSet rs2 = test2.executeQuery();
@@ -1491,8 +1492,8 @@ public class FXMLController implements Initializable {
                             case "Others":
                                 try{
                                 //Connection con2 = connectionPool.getConnection();
-                                PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = 'D' then 1 else 0 end) as count_num from tickets");
-                                PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'D' then 1 else 0 end) as count_num from transfer");
+                                PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = '"+othersTag+"' then 1 else 0 end) as count_num from tickets where t_date='"+local_date+"'");
+                                PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+othersTag+"' then 1 else 0 end) as count_num from transfer where t_date='"+local_date+"'");
                                 ResultSet rs5 = countInLine.executeQuery();
                                 ResultSet rs5b = countInLineb.executeQuery();
                                 while(rs5.next() && rs5b.next()){
@@ -1504,7 +1505,7 @@ public class FXMLController implements Initializable {
                                          if(pplineb != null){ppline =String.valueOf(Integer.valueOf(ppline) + Integer.valueOf(pplineb));}
                                         otherNoInline.setText(ppline);}
                                     }
-                                PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'D' then 1 else 0 end) as count_num_trans from transfer");
+                                PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+othersTag+"' then 1 else 0 end) as count_num_trans from transfer where t_date='"+local_date+"'");
                                 ResultSet rst2 =countTrans4.executeQuery();
                                 while(rst2.next()){
                                     String noTrans = rst2.getString("count_num_trans");
@@ -1515,8 +1516,8 @@ public class FXMLController implements Initializable {
                             case "Current Customer":
                                 try{
                                     //Connection con2 = connectionPool.getConnection();
-                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = 'A' then 1 else 0 end) as count_num from tickets");
-                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'A' then 1 else 0 end) as count_num from transfer");
+                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = '"+currentCusTag+"' then 1 else 0 end) as count_num from tickets where t_date='"+local_date+"'");
+                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+currentCusTag+"' then 1 else 0 end) as count_num from transfer where t_date='"+local_date+"'");
                                     ResultSet rs5 = countInLine.executeQuery();
                                     ResultSet rs5b = countInLineb.executeQuery();
                                     while(rs5.next() && rs5b.next()){
@@ -1528,7 +1529,7 @@ public class FXMLController implements Initializable {
                                              if(pplineb != null){ppline =String.valueOf(Integer.valueOf(ppline) + Integer.valueOf(pplineb));}
                                             currentCusNoInline.setText(ppline);}
                                         }
-                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'A' then 1 else 0 end) as count_num_trans from transfer");
+                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+currentCusTag+"' then 1 else 0 end) as count_num_trans from transfer where t_date='"+local_date+"'");
                                     ResultSet rst2 =countTrans4.executeQuery();
                                     while(rst2.next()){
                                         String noTrans = rst2.getString("count_num_trans");
@@ -1539,8 +1540,8 @@ public class FXMLController implements Initializable {
                             case "New Customer":
                                 try{
                                     //Connection con2 = connectionPool.getConnection();
-                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = 'B' then 1 else 0 end) as count_num from tickets");
-                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'B' then 1 else 0 end) as count_num from transfer");
+                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = '"+newCusTag+"' then 1 else 0 end) as count_num from tickets where t_date='"+local_date+"'");
+                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+newCusTag+"' then 1 else 0 end) as count_num from transfer where t_date='"+local_date+"'");
                                     ResultSet rs5 = countInLine.executeQuery();
                                     ResultSet rs5b = countInLineb.executeQuery();
                                     while(rs5.next() && rs5b.next()){
@@ -1552,7 +1553,7 @@ public class FXMLController implements Initializable {
                                              if(pplineb != null){ppline =String.valueOf(Integer.valueOf(ppline) + Integer.valueOf(pplineb));}
                                             newCusNoInline.setText(ppline);}
                                         }
-                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'B' then 1 else 0 end) as count_num_trans from transfer");
+                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+newCusTag+"' then 1 else 0 end) as count_num_trans from transfer where t_date='"+local_date+"'");
                                     ResultSet rst2 =countTrans4.executeQuery();
                                     while(rst2.next()){
                                         String noTrans = rst2.getString("count_num_trans");
@@ -1563,8 +1564,8 @@ public class FXMLController implements Initializable {
                             case "Services":
                                 try{
                                     //Connection con2 = connectionPool.getConnection();
-                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = 'C' then 1 else 0 end) as count_num from tickets");
-                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'C' then 1 else 0 end) as count_num from transfer");
+                                    PreparedStatement countInLine = con2.prepareStatement("select sum(case when time_called IS NULL and tag = '"+serviceTag+"' then 1 else 0 end) as count_num from tickets where t_date='"+local_date+"'");
+                                    PreparedStatement countInLineb = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+serviceTag+"' then 1 else 0 end) as count_num from transfer where t_date='"+local_date+"'");
                                     ResultSet rs5 = countInLine.executeQuery();
                                     ResultSet rs5b = countInLineb.executeQuery();
                                     while(rs5.next() && rs5b.next()){
@@ -1576,7 +1577,7 @@ public class FXMLController implements Initializable {
                                              if(pplineb != null){ppline =String.valueOf(Integer.valueOf(ppline) + Integer.valueOf(pplineb));}
                                             servicesNoInline.setText(ppline);}
                                         }
-                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = 'C' then 1 else 0 end) as count_num_trans from transfer");
+                                    PreparedStatement countTrans4 = con2.prepareStatement("select sum(case when time_called IS NULL and trans_to = '"+serviceTag+"' then 1 else 0 end) as count_num_trans from transfer where t_date='"+local_date+"'");
                                     ResultSet rst2 =countTrans4.executeQuery();
                                     while(rst2.next()){
                                         String noTrans = rst2.getString("count_num_trans");
